@@ -23,6 +23,7 @@ import UserCartWrapper from "./cart-wrapper";
 import { useEffect, useState } from "react";
 import { fetchCartItems } from "@/store/shop/cart-slice";
 import { Label } from "../ui/label";
+import ThemeToggle from "../common/theme-toggle";
 
 function MenuItems() {
   const navigate = useNavigate();
@@ -54,7 +55,7 @@ function MenuItems() {
       {shoppingViewHeaderMenuItems.map((menuItem) => (
         <Label
           onClick={() => handleNavigate(menuItem)}
-          className="text-sm font-medium cursor-pointer"
+          className="text-sm font-medium cursor-pointer text-white dark:text-blue-100 hover:text-secondary dark:hover:text-accent transition-colors duration-200"
           key={menuItem.id}
         >
           {menuItem.label}
@@ -85,15 +86,17 @@ function HeaderRightContent() {
 
   return (
     <div className="flex lg:items-center lg:flex-row flex-col gap-4">
+      <ThemeToggle className="bg-secondary hover:bg-accent border-secondary text-foreground" />
+      
       <Sheet open={openCartSheet} onOpenChange={() => setOpenCartSheet(false)}>
         <Button
           onClick={() => setOpenCartSheet(true)}
           variant="outline"
           size="icon"
-          className="relative"
+          className="relative bg-secondary hover:bg-accent border-secondary text-foreground"
         >
           <ShoppingCart className="w-6 h-6" />
-          <span className="absolute top-[-5px] right-[2px] font-bold text-sm">
+          <span className="absolute top-[-5px] right-[2px] font-bold text-sm bg-primary text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">
             {cartItems?.length || 0}
           </span>
           <span className="sr-only">User cart</span>
@@ -110,8 +113,8 @@ function HeaderRightContent() {
 
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Avatar className="bg-black">
-            <AvatarFallback className="bg-black text-white font-extrabold">
+          <Avatar className="bg-primary border-2 border-secondary hover:border-accent transition-colors cursor-pointer">
+            <AvatarFallback className="bg-primary text-secondary font-extrabold">
               {user?.userName[0].toUpperCase()}
             </AvatarFallback>
           </Avatar>
@@ -138,15 +141,15 @@ function ShoppingHeader() {
   const { isAuthenticated } = useSelector((state) => state.auth);
 
   return (
-    <header className="fixed top-0 z-40 w-full border-b bg-white shadow-sm">
+    <header className="fixed top-0 z-40 w-full border-b bg-gradient-to-r from-primary via-primary/95 to-primary/90 dark:from-primary dark:via-secondary/30 dark:to-primary shadow-lg">
       <div className="flex h-16 items-center justify-between px-4 md:px-6">
-        <Link to="/shop/home" className="flex items-center gap-2">
-          <HousePlug className="h-6 w-6" />
-          <span className="font-bold">BukSu EEU</span>
+        <Link to="/shop/home" className="flex items-center gap-2 group">
+          <HousePlug className="h-6 w-6 text-secondary dark:text-accent group-hover:text-accent transition-colors" />
+          <span className="font-bold text-white dark:text-secondary text-lg">BukSu EEU</span>
         </Link>
         <Sheet>
           <SheetTrigger asChild>
-            <Button variant="outline" size="icon" className="lg:hidden">
+            <Button variant="outline" size="icon" className="lg:hidden bg-secondary hover:bg-accent border-secondary text-foreground">
               <Menu className="h-6 w-6" />
               <span className="sr-only">Toggle header menu</span>
             </Button>

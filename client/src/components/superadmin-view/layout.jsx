@@ -1,11 +1,11 @@
 import { Outlet } from "react-router-dom";
-import AdminSideBar from "./sidebar";
-import AdminHeader from "./header";
+import SuperAdminSideBar from "./sidebar";
+import SuperAdminHeader from "./header";
 import { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { getAdminProfile } from "@/store/admin/profile-slice";
 
-function AdminLayout() {
+function SuperAdminLayout() {
   const [openSidebar, setOpenSidebar] = useState(false);
   const dispatch = useDispatch();
 
@@ -15,11 +15,11 @@ function AdminLayout() {
 
   return (
     <div className="flex min-h-screen w-full">
-      {/* admin sidebar */}
-      <AdminSideBar open={openSidebar} setOpen={setOpenSidebar} />
+      {/* superadmin sidebar */}
+      <SuperAdminSideBar open={openSidebar} setOpen={setOpenSidebar} />
       <div className="flex flex-1 flex-col">
-        {/* admin header */}
-        <AdminHeader setOpen={setOpenSidebar} />
+        {/* superadmin header */}
+        <SuperAdminHeader setOpen={setOpenSidebar} />
         <main className="flex-1 flex-col flex bg-gradient-to-br from-blue-50/50 to-yellow-50/30 dark:from-muted/20 dark:to-background p-4 md:p-6">
           <Outlet />
         </main>
@@ -28,4 +28,5 @@ function AdminLayout() {
   );
 }
 
-export default AdminLayout;
+export default SuperAdminLayout;
+

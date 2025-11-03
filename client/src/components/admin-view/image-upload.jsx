@@ -98,21 +98,21 @@ function ProductImageUpload({
         ) : (
           <div className="space-y-2">
             {imageLoadingState && (
-              <div className="bg-blue-50 border border-blue-200 rounded-md p-2">
-                <p className="text-sm text-blue-700 font-medium">Uploading...</p>
+              <div className="bg-secondary/20 border border-secondary rounded-md p-2">
+                <p className="text-sm text-primary font-medium">Uploading...</p>
               </div>
             )}
-            <div className="flex items-center justify-between gap-3 bg-gray-100 border-2 border-gray-300 p-3 rounded-md">
+            <div className="flex items-center justify-between gap-3 bg-background border-2 border-primary/20 p-3 rounded-md">
               <div className="flex items-center gap-3 flex-1 min-w-0">
-                <div className="bg-blue-500 rounded p-2">
+                <div className="bg-primary rounded p-2">
                   <FileIcon className="w-6 h-6 text-white flex-shrink-0" />
                 </div>
-                <p className="text-sm font-semibold text-black truncate">{imageFile.name}</p>
+                <p className="text-sm font-semibold text-foreground truncate">{imageFile.name}</p>
               </div>
               <Button
                 variant="ghost"
                 size="icon"
-                className="bg-white text-black hover:text-white hover:bg-red-600 transition-all duration-200 flex-shrink-0 border-2 border-gray-400 shadow-sm"
+                className="bg-background text-foreground hover:text-white hover:bg-destructive transition-all duration-200 flex-shrink-0 border-2 border-border shadow-sm"
                 onClick={handleRemoveImage}
               >
                 <XIcon className="w-5 h-5 stroke-[3]" />

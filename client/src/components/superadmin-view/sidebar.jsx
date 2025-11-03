@@ -1,30 +1,43 @@
 import {
-  BadgeCheck,
-  ChartNoAxesCombined,
-  ShoppingBasket,
+  LayoutDashboard,
+  ShieldCheck,
   User,
+  ShoppingBasket,
+  BadgeCheck,
 } from "lucide-react";
 import { Fragment } from "react";
 import { useNavigate } from "react-router-dom";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "../ui/sheet";
 
-const adminSidebarMenuItems = [
+const superAdminSidebarMenuItems = [
+  {
+    id: "dashboard",
+    label: "Dashboard",
+    path: "/superadmin/dashboard",
+    icon: <LayoutDashboard />,
+  },
+  {
+    id: "admins",
+    label: "Manage Admins",
+    path: "/superadmin/admins",
+    icon: <ShieldCheck />,
+  },
   {
     id: "products",
     label: "Products",
-    path: "/admin/products",
+    path: "/superadmin/products",
     icon: <ShoppingBasket />,
   },
   {
     id: "orders",
     label: "Orders",
-    path: "/admin/orders",
+    path: "/superadmin/orders",
     icon: <BadgeCheck />,
   },
   {
     id: "profile",
     label: "My Profile",
-    path: "/admin/profile",
+    path: "/superadmin/profile",
     icon: <User />,
   },
 ];
@@ -34,7 +47,7 @@ function MenuItems({ setOpen }) {
 
   return (
     <nav className="mt-8 flex-col flex gap-2">
-      {adminSidebarMenuItems.map((menuItem) => (
+      {superAdminSidebarMenuItems.map((menuItem) => (
         <div
           key={menuItem.id}
           onClick={() => {
@@ -51,7 +64,7 @@ function MenuItems({ setOpen }) {
   );
 }
 
-function AdminSideBar({ open, setOpen }) {
+function SuperAdminSideBar({ open, setOpen }) {
   const navigate = useNavigate();
 
   return (
@@ -61,8 +74,8 @@ function AdminSideBar({ open, setOpen }) {
           <div className="flex flex-col h-full">
             <SheetHeader className="border-b">
               <SheetTitle className="flex gap-2 mt-5 mb-5">
-                <ChartNoAxesCombined size={30} />
-                <h1 className="text-2xl font-extrabold">Admin Panel</h1>
+                <ShieldCheck size={30} className="text-secondary" />
+                <h1 className="text-2xl font-extrabold">Super Admin</h1>
               </SheetTitle>
             </SheetHeader>
             <MenuItems setOpen={setOpen} />
@@ -71,11 +84,11 @@ function AdminSideBar({ open, setOpen }) {
       </Sheet>
       <aside className="hidden w-64 flex-col border-r bg-gradient-to-b from-white to-blue-50 dark:from-card dark:to-background p-6 lg:flex shadow-md">
         <div
-          onClick={() => navigate("/admin/products")}
+          onClick={() => navigate("/superadmin/dashboard")}
           className="flex cursor-pointer items-center gap-2 transition-all duration-300 ease-in-out hover:scale-105 text-primary"
         >
-          <ChartNoAxesCombined size={30} className="text-secondary dark:text-accent" />
-          <h1 className="text-2xl font-extrabold">Admin Panel</h1>
+          <ShieldCheck size={30} className="text-secondary dark:text-accent" />
+          <h1 className="text-2xl font-extrabold">Super Admin</h1>
         </div>
         <MenuItems />
       </aside>
@@ -83,4 +96,5 @@ function AdminSideBar({ open, setOpen }) {
   );
 }
 
-export default AdminSideBar;
+export default SuperAdminSideBar;
+

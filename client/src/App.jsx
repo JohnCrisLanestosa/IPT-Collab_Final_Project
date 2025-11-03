@@ -9,6 +9,10 @@ import AdminLayout from "./components/admin-view/layout";
 import AdminProducts from "./pages/admin-view/products";
 import AdminOrders from "./pages/admin-view/orders";
 import AdminFeatures from "./pages/admin-view/features";
+import SuperAdminLayout from "./components/superadmin-view/layout";
+import SuperAdminDashboard from "./pages/superadmin-view/dashboard";
+import AdminManagement from "./pages/superadmin-view/admins";
+import AdminProfile from "./pages/admin-view/profile";
 import ShoppingLayout from "./components/shopping-view/layout";
 import NotFound from "./pages/not-found";
 import ShoppingHome from "./pages/shopping-view/home";
@@ -34,12 +38,16 @@ function App() {
     dispatch(checkAuth());
   }, [dispatch]);
 
-  if (isLoading) return <Skeleton className="w-[800] bg-black h-[600px]" />;
+  if (isLoading) return (
+    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-primary to-secondary dark:from-primary dark:to-card">
+      <Skeleton className="w-[800] bg-white/20 dark:bg-primary/20 h-[600px] rounded-xl" />
+    </div>
+  );
 
   console.log(isLoading, user);
 
   return (
-    <div className="flex flex-col bg-white">
+    <div className="flex flex-col bg-gradient-to-br from-background to-blue-50 dark:from-background dark:to-card">
       <Routes>
         <Route
           path="/"
@@ -65,6 +73,21 @@ function App() {
         </Route>
         <Route path="/auth/google-verify" element={<GoogleVerify />} />
         <Route
+          path="/superadmin"
+          element={
+            <CheckAuth isAuthenticated={isAuthenticated} user={user}>
+              <SuperAdminLayout />
+            </CheckAuth>
+          }
+        >
+          <Route index element={<Navigate to="/superadmin/dashboard" replace />} />
+          <Route path="dashboard" element={<SuperAdminDashboard />} />
+          <Route path="admins" element={<AdminManagement />} />
+          <Route path="products" element={<AdminProducts />} />
+          <Route path="orders" element={<AdminOrders />} />
+          <Route path="profile" element={<AdminProfile />} />
+        </Route>
+        <Route
           path="/admin"
           element={
             <CheckAuth isAuthenticated={isAuthenticated} user={user}>
@@ -76,6 +99,7 @@ function App() {
           <Route path="products" element={<AdminProducts />} />
           <Route path="orders" element={<AdminOrders />} />
           <Route path="features" element={<AdminFeatures />} />
+          <Route path="profile" element={<AdminProfile />} />
         </Route>
         <Route
           path="/shop"

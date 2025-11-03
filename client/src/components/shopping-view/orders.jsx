@@ -67,10 +67,12 @@ function ShoppingOrders() {
                       <Badge
                         className={`py-1 px-3 ${
                           orderItem?.orderStatus === "confirmed"
-                            ? "bg-green-500"
+                            ? "bg-green-500 hover:bg-green-600"
                             : orderItem?.orderStatus === "rejected"
-                            ? "bg-red-600"
-                            : "bg-black"
+                            ? "bg-red-600 hover:bg-red-700"
+                            : orderItem?.orderStatus === "delivered"
+                            ? "bg-primary hover:bg-primary/90"
+                            : "bg-secondary hover:bg-accent text-foreground"
                         }`}
                       >
                         {orderItem?.orderStatus}

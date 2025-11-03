@@ -14,7 +14,7 @@ import {
 } from "../ui/dropdown-menu";
 import { useNavigate } from "react-router-dom";
 
-function AdminHeader({ setOpen }) {
+function SuperAdminHeader({ setOpen }) {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { user } = useSelector((state) => state.auth);
@@ -40,7 +40,7 @@ function AdminHeader({ setOpen }) {
                 <AvatarImage src={profile.profilePicture} alt={user?.userName} />
               ) : null}
               <AvatarFallback className="bg-primary text-secondary font-extrabold">
-                {user?.userName?.[0]?.toUpperCase() || "A"}
+                {user?.userName?.[0]?.toUpperCase() || "S"}
               </AvatarFallback>
             </Avatar>
           </DropdownMenuTrigger>
@@ -48,11 +48,11 @@ function AdminHeader({ setOpen }) {
             <DropdownMenuLabel>
               {user?.userName}
               <div className="text-xs text-muted-foreground font-normal">
-                {user?.role === "superadmin" ? "Super Admin" : "Admin"}
+                Super Admin
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => navigate("/admin/profile")}>
+            <DropdownMenuItem onClick={() => navigate("/superadmin/profile")}>
               <UserIcon className="mr-2 h-4 w-4" />
               My Profile
             </DropdownMenuItem>
@@ -67,5 +67,6 @@ function AdminHeader({ setOpen }) {
     </header>
   );
 }
-//logout button in admin header
-export default AdminHeader;
+
+export default SuperAdminHeader;
+

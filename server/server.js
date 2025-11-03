@@ -10,6 +10,8 @@ const authRouter = require("./routes/auth/auth-routes");
 const googleAuthRouter = require("./routes/auth/google-auth-routes");
 const adminProductsRouter = require("./routes/admin/products-routes");
 const adminOrderRouter = require("./routes/admin/order-routes");
+const adminProfileRouter = require("./routes/admin/profile-routes");
+const superAdminRouter = require("./routes/superadmin/admin-routes");
 
 const shopProductsRouter = require("./routes/shop/products-routes");
 const shopCartRouter = require("./routes/shop/cart-routes");
@@ -69,6 +71,8 @@ app.use("/api/auth", authRouter);
 app.use("/api/auth", googleAuthRouter);
 app.use("/api/admin/products", adminProductsRouter);
 app.use("/api/admin/orders", adminOrderRouter);
+app.use("/api/admin/profile", adminProfileRouter);
+app.use("/api/superadmin/admins", superAdminRouter);
 
 app.use("/api/shop/products", shopProductsRouter);
 app.use("/api/shop/cart", shopCartRouter);

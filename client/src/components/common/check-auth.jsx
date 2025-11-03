@@ -9,7 +9,9 @@ function CheckAuth({ isAuthenticated, user, children }) {
     if (!isAuthenticated) {
       return <Navigate to="/auth/login" />;
     } else {
-      if (user?.role === "admin") {
+      if (user?.role === "superadmin") {
+        return <Navigate to="/superadmin/dashboard" />;
+      } else if (user?.role === "admin") {
         return <Navigate to="/admin/products" />;
       } else {
         return <Navigate to="/shop/home" />;
@@ -36,7 +38,9 @@ function CheckAuth({ isAuthenticated, user, children }) {
       location.pathname.includes("/forgot-password") ||
       location.pathname.includes("/reset-password"))
   ) {
-    if (user?.role === "admin") {
+    if (user?.role === "superadmin") {
+      return <Navigate to="/superadmin/dashboard" />;
+    } else if (user?.role === "admin") {
       return <Navigate to="/admin/products" />;
     } else {
       return <Navigate to="/shop/home" />;
@@ -46,7 +50,17 @@ function CheckAuth({ isAuthenticated, user, children }) {
   if (
     isAuthenticated &&
     user?.role !== "admin" &&
+    user?.role !== "superadmin" &&
     location.pathname.includes("admin")
+  ) {
+    return <Navigate to="/unauth-page" />;
+  }
+
+  if (
+    isAuthenticated &&
+    user?.role !== "admin" &&
+    user?.role !== "superadmin" &&
+    location.pathname.includes("superadmin")
   ) {
     return <Navigate to="/unauth-page" />;
   }
@@ -57,6 +71,22 @@ function CheckAuth({ isAuthenticated, user, children }) {
     location.pathname.includes("shop")
   ) {
     return <Navigate to="/admin/products" />;
+  }
+
+  if (
+    isAuthenticated &&
+    user?.role === "superadmin" &&
+    location.pathname.includes("shop")
+  ) {
+    return <Navigate to="/superadmin/dashboard" />;
+  }
+
+  if (
+    isAuthenticated &&
+    user?.role === "admin" &&
+    location.pathname.includes("superadmin")
+  ) {
+    return <Navigate to="/unauth-page" />;
   }
 
   return <>{children}</>;
