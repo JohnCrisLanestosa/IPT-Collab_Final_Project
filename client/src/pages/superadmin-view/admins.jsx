@@ -4,7 +4,8 @@ import {
   getAllAdmins,
   createAdmin,
   updateAdmin,
-  deleteAdmin,
+  archiveAdmin,
+  unarchiveAdmin,
 } from "@/store/superadmin/admin-slice";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -26,12 +27,14 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
-import { Pencil, Trash2, Plus, ShieldCheck } from "lucide-react";
+import { Pencil, Plus, ShieldCheck, Archive, ArchiveRestore } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 function AdminManagement() {
   const dispatch = useDispatch();
   const { adminList, isLoading } = useSelector((state) => state.superAdmin);
+  const activeAdmins = adminList?.active || [];
+  const archivedAdmins = adminList?.archived || [];
   const { toast } = useToast();
 
   const [openDialog, setOpenDialog] = useState(false);
@@ -92,6 +95,7 @@ function AdminManagement() {
         toast({
           title: "Success",
           description: data.payload.message,
+          variant: "success",
         });
         setOpenDialog(false);
         dispatch(getAllAdmins());
@@ -105,24 +109,44 @@ function AdminManagement() {
     });
   };
 
-  const handleDelete = (id) => {
-    if (confirm("Are you sure you want to delete this admin?")) {
-      dispatch(deleteAdmin(id)).then((data) => {
+  const handleArchive = (id) => {
+    if (confirm("Are you sure you want to archive this admin?")) {
+      dispatch(archiveAdmin(id)).then((data) => {
         if (data?.payload?.success) {
           toast({
-            title: "Success",
-            description: "Admin deleted successfully",
+            title: "Admin archived",
+            description: data.payload.message,
+            variant: "success",
           });
           dispatch(getAllAdmins());
         } else {
           toast({
             title: "Error",
-            description: data?.payload?.message || "Delete failed",
+            description: data?.payload?.message || "Archive failed",
             variant: "destructive",
           });
         }
       });
     }
+  };
+
+  const handleUnarchive = (id) => {
+    dispatch(unarchiveAdmin(id)).then((data) => {
+      if (data?.payload?.success) {
+        toast({
+          title: "Admin restored",
+          description: data.payload.message,
+          variant: "success",
+        });
+        dispatch(getAllAdmins());
+      } else {
+        toast({
+          title: "Error",
+          description: data?.payload?.message || "Unarchive failed",
+          variant: "destructive",
+        });
+      }
+    });
   };
 
   const formatDate = (dateString) => {
@@ -156,16 +180,16 @@ function AdminManagement() {
 
       <Card className="border-2">
         <CardHeader>
-          <CardTitle className="text-xl">Admin Accounts</CardTitle>
+          <CardTitle className="text-xl">Active Admins</CardTitle>
         </CardHeader>
         <CardContent>
           {isLoading ? (
             <div className="text-center py-8 text-muted-foreground">
               Loading...
             </div>
-          ) : adminList.length === 0 ? (
+          ) : activeAdmins.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
-              No admin accounts found. Create one to get started.
+              No active admin accounts. Create one to get started.
             </div>
           ) : (
             <Table>
@@ -179,7 +203,7 @@ function AdminManagement() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {adminList.map((admin) => (
+                {activeAdmins.map((admin) => (
                   <TableRow key={admin._id}>
                     <TableCell className="font-medium">
                       {admin.userName}
@@ -204,12 +228,76 @@ function AdminManagement() {
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => handleDelete(admin._id)}
-                          className="hover:bg-destructive hover:text-white"
+                          onClick={() => handleArchive(admin._id)}
+                          className="border-amber-200 text-amber-600 hover:bg-amber-50"
+                          title="Archive admin"
                         >
-                          <Trash2 className="h-4 w-4" />
+                          <Archive className="h-4 w-4" />
                         </Button>
                       </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card className="border-2">
+        <CardHeader>
+          <CardTitle className="text-xl flex items-center gap-2">
+            <Archive className="h-5 w-5" />
+            Archived Admins
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {isLoading ? (
+            <div className="text-center py-8 text-muted-foreground">
+              Loading...
+            </div>
+          ) : archivedAdmins.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground">
+              Archived admins will appear here.
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Email</TableHead>
+                  <TableHead>Role</TableHead>
+                  <TableHead>Archived On</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {archivedAdmins.map((admin) => (
+                  <TableRow key={admin._id}>
+                    <TableCell className="font-medium">
+                      {admin.userName}
+                    </TableCell>
+                    <TableCell>{admin.email}</TableCell>
+                    <TableCell>
+                      <Badge className="bg-muted text-foreground">
+                        Archived
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      {admin.archivedAt
+                        ? formatDate(admin.archivedAt)
+                        : "—"}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleUnarchive(admin._id)}
+                        className="border-emerald-200 text-emerald-600 hover:bg-emerald-50"
+                        title="Unarchive admin"
+                      >
+                        <ArchiveRestore className="h-4 w-4" />
+                      </Button>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -246,10 +334,13 @@ function AdminManagement() {
                 type="email"
                 placeholder="Enter email"
                 value={formData.email}
+                disabled={isEdit}
+                readOnly={isEdit}
                 onChange={(e) =>
                   setFormData({ ...formData, email: e.target.value })
                 }
               />
+           
             </div>
             <div className="space-y-2">
               <Label htmlFor="password">

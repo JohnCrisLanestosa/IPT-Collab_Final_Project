@@ -1,22 +1,27 @@
-import Address from "@/components/shopping-view/address";
+import CustomerInfo from "@/components/shopping-view/customer-info";
 import { useDispatch, useSelector } from "react-redux";
 import UserCartItemsContent from "@/components/shopping-view/cart-items-content";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { createNewOrder } from "@/store/shop/order-slice";
+import { fetchCartItems } from "@/store/shop/cart-slice";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
+import { Loader2, CheckCircle2 } from "lucide-react";
+import BackButton from "@/components/common/back-button";
 
 function ShoppingCheckout() {
   const { cartItems } = useSelector((state) => state.shopCart);
   const { user } = useSelector((state) => state.auth);
-  const [currentSelectedAddress, setCurrentSelectedAddress] = useState(null);
+  const [customerInfo, setCustomerInfo] = useState(null);
   const [isPaymentStart, setIsPaymemntStart] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
+  const [buttonClicked, setButtonClicked] = useState(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  console.log(currentSelectedAddress, "cartItems");
+  console.log(customerInfo, "cartItems");
 
   const totalCartAmount =
     cartItems && cartItems.length > 0
@@ -36,12 +41,23 @@ function ShoppingCheckout() {
 
       return;
     }
-    if (currentSelectedAddress === null) {
+    if (customerInfo === null || !customerInfo.name || !customerInfo.email || !customerInfo.phone) {
       toast({
-        title: "Please select one address to proceed.",
+        title: "Please fill in all required customer information (Name, Email, and Phone Number) to proceed.",
         variant: "destructive",
       });
 
+      return;
+    }
+
+    // Validate phone number format
+    const phoneRegex = /^[0-9]{10,}$/;
+    const cleanedPhone = customerInfo.phone.replace(/\D/g, ''); // Remove non-digits
+    if (!cleanedPhone || cleanedPhone.length < 10) {
+      toast({
+        title: "Please enter a valid phone number",
+        variant: "destructive",
+      });
       return;
     }
 
@@ -56,12 +72,11 @@ function ShoppingCheckout() {
         quantity: singleCartItem?.quantity,
       })),
       addressInfo: {
-        addressId: currentSelectedAddress?._id,
-        address: currentSelectedAddress?.address,
-        city: currentSelectedAddress?.city,
-        pincode: currentSelectedAddress?.pincode,
-        phone: currentSelectedAddress?.phone,
-        notes: currentSelectedAddress?.notes,
+        address: customerInfo.name, // Store name in address field for compatibility
+        city: "", // Not needed for customer info
+        pincode: "", // Not needed for customer info
+        phone: cleanedPhone, // Use cleaned phone number (digits only)
+        notes: customerInfo.email, // Store email in notes field for compatibility
       },
       orderStatus: "pending",
       paymentMethod: "cash",
@@ -71,14 +86,25 @@ function ShoppingCheckout() {
       orderUpdateDate: new Date(),
     };
 
+    setButtonClicked(true);
     setIsPaymemntStart(true);
 
     dispatch(createNewOrder(orderData)).then((data) => {
       if (data?.payload?.success) {
+        setIsSuccess(true);
         setIsPaymemntStart(false);
-        navigate("/shop/payment-success");
+        
+        // Show success animation briefly before navigating
+        setTimeout(() => {
+          // Clear cart by refetching (backend already cleared it)
+          dispatch(fetchCartItems(user?.id)).then(() => {
+            navigate("/shop/payment-success", { state: { orderId: data?.payload?.orderId } });
+          });
+        }, 800);
       } else {
         setIsPaymemntStart(false);
+        setButtonClicked(false);
+        setIsSuccess(false);
         toast({
           title: "Failed to create order. Please try again.",
           variant: "destructive",
@@ -89,13 +115,17 @@ function ShoppingCheckout() {
 
   return (
     <div className="flex flex-col">
-      <div className="relative h-[300px] w-full overflow-hidden">
-        <img src="/BukSu BG.png" className="h-full w-full object-cover object-center" />
+      <div className="p-5 pt-6">
+        <BackButton fallbackPath="/shop/home" />
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mt-5 p-5">
-        <Address
-          selectedId={currentSelectedAddress}
-          setCurrentSelectedAddress={setCurrentSelectedAddress}
+        <CustomerInfo
+          customerInfo={customerInfo}
+          setCustomerInfo={setCustomerInfo}
+          onFormDataChange={(formData) => {
+            // Auto-save customer info whenever form data changes
+            setCustomerInfo(formData);
+          }}
         />
         <div className="flex flex-col gap-4">
           {cartItems && cartItems.length > 0
@@ -110,10 +140,30 @@ function ShoppingCheckout() {
             </div>
           </div>
           <div className="mt-4 w-full">
-            <Button onClick={handlePlaceOrder} className="w-full" disabled={isPaymentStart}>
-              {isPaymentStart
-                ? "Placing Order..."
-                : "Place Order"}
+            <Button 
+              onClick={handlePlaceOrder} 
+              className={`w-full transition-all duration-300 ${
+                buttonClicked && !isSuccess
+                  ? "animate-pulse scale-95"
+                  : isSuccess
+                  ? "bg-green-500 hover:bg-green-600 scale-105"
+                  : "hover:scale-105 active:scale-95"
+              }`}
+              disabled={isPaymentStart || isSuccess}
+            >
+              {isPaymentStart ? (
+                <span className="flex items-center gap-2">
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Placing Order...
+                </span>
+              ) : isSuccess ? (
+                <span className="flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 animate-in zoom-in duration-300" />
+                  Order Placed Successfully!
+                </span>
+              ) : (
+                "Place Order"
+              )}
             </Button>
           </div>
         </div>

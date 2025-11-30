@@ -19,7 +19,8 @@ import {
 import { ArrowUpDownIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import BackButton from "@/components/common/back-button";
 
 function createSearchParamsHelper(filterParams) {
   const queryParams = [];
@@ -49,6 +50,7 @@ function ShoppingListing() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [openDetailsDialog, setOpenDetailsDialog] = useState(false);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const categorySearchParam = searchParams.get("category");
 
@@ -83,16 +85,27 @@ function ShoppingListing() {
     dispatch(fetchProductDetails(getCurrentProductId));
   }
 
-  function handleAddtoCart(getCurrentProductId, getTotalStock) {
-    console.log(cartItems);
-    let getCartItems = cartItems.items || [];
+  function getCartItemsList() {
+    if (Array.isArray(cartItems)) return cartItems;
+    if (Array.isArray(cartItems?.items)) return cartItems.items;
+    return [];
+  }
 
-    if (getCartItems.length) {
-      const indexOfCurrentItem = getCartItems.findIndex(
+  function attemptAddToCart(getCurrentProductId, getTotalStock, shouldNavigate) {
+    if (!user?.id) {
+      navigate("/auth/login");
+      return;
+    }
+
+    const existingCartItems = getCartItemsList();
+    const hasStockLimit = typeof getTotalStock === "number";
+
+    if (existingCartItems.length && hasStockLimit) {
+      const indexOfCurrentItem = existingCartItems.findIndex(
         (item) => item.productId === getCurrentProductId
       );
       if (indexOfCurrentItem > -1) {
-        const getQuantity = getCartItems[indexOfCurrentItem].quantity;
+        const getQuantity = existingCartItems[indexOfCurrentItem].quantity;
         if (getQuantity + 1 > getTotalStock) {
           toast({
             title: `Only ${getQuantity} quantity can be added for this item`,
@@ -112,12 +125,26 @@ function ShoppingListing() {
       })
     ).then((data) => {
       if (data?.payload?.success) {
-        dispatch(fetchCartItems(user?.id));
-        toast({
-          title: "Product is added to cart",
+        dispatch(fetchCartItems(user?.id)).then(() => {
+          if (shouldNavigate) {
+            navigate("/shop/checkout");
+          } else {
+            toast({
+              title: "Product is added to cart",
+              variant: "success",
+            });
+          }
         });
       }
     });
+  }
+
+  function handleAddtoCart(getCurrentProductId, getTotalStock) {
+    attemptAddToCart(getCurrentProductId, getTotalStock, false);
+  }
+
+  function handleBuyNow(getCurrentProductId, getTotalStock) {
+    attemptAddToCart(getCurrentProductId, getTotalStock, true);
   }
 
   useEffect(() => {
@@ -150,7 +177,10 @@ function ShoppingListing() {
       <ProductFilter filters={filters} handleFilter={handleFilter} />
       <div className="bg-background w-full rounded-lg shadow-sm">
         <div className="p-4 border-b flex items-center justify-between">
-          <h2 className="text-lg font-extrabold">All Products</h2>
+          <div className="flex items-center gap-3">
+            <BackButton fallbackPath="/shop/home" />
+            <h2 className="text-lg font-extrabold">All Products</h2>
+          </div>
           <div className="flex items-center gap-3">
             <span className="text-muted-foreground">
               {productList?.length} Products
@@ -188,6 +218,7 @@ function ShoppingListing() {
                   handleGetProductDetails={handleGetProductDetails}
                   product={productItem}
                   handleAddtoCart={handleAddtoCart}
+                  handleBuyNow={handleBuyNow}
                 />
               ))
             : null}

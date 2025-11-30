@@ -79,3 +79,32 @@
     transition-property: color, background-color, border-color;
   }
 }
+
+.recaptcha-wrap {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  padding: 0.5rem 0;
+  border-radius: 12px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.recaptcha-attention {
+  animation: recaptcha-shake 0.6s ease;
+  box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.45);
+}
+
+@keyframes recaptcha-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20%,
+  60% {
+    transform: translateX(-6px);
+  }
+  40%,
+  80% {
+    transform: translateX(6px);
+  }
+}

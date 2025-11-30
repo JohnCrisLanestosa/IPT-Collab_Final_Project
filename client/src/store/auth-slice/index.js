@@ -26,16 +26,25 @@ export const registerUser = createAsyncThunk(
 export const loginUser = createAsyncThunk(
   "/auth/login",
 
-  async (formData) => {
-    const response = await axios.post(
-      "http://localhost:5000/api/auth/login",
-      formData,
-      {
-        withCredentials: true,
-      }
-    );
+  async (formData, { rejectWithValue }) => {
+    try {
+      const response = await axios.post(
+        "http://localhost:5000/api/auth/login",
+        formData,
+        {
+          withCredentials: true,
+        }
+      );
 
-    return response.data;
+      return response.data;
+    } catch (error) {
+      return rejectWithValue({
+        ...(error?.response?.data || {}),
+        status: error?.response?.status || 500,
+        message:
+          error?.response?.data?.message || "Unable to login. Please try again.",
+      });
+    }
   }
 );
 

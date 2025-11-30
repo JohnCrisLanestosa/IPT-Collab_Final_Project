@@ -3,7 +3,10 @@ import axios from "axios";
 
 const initialState = {
   isLoading: false,
-  adminList: [],
+  adminList: {
+    active: [],
+    archived: [],
+  },
   statistics: {
     totalUsers: 0,
     totalAdmins: 0,
@@ -99,6 +102,36 @@ export const toggleAdminStatus = createAsyncThunk(
   }
 );
 
+// Archive admin
+export const archiveAdmin = createAsyncThunk(
+  "superadmin/archiveAdmin",
+  async (id) => {
+    const response = await axios.patch(
+      `http://localhost:5000/api/superadmin/admins/${id}/archive`,
+      {},
+      {
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  }
+);
+
+// Unarchive admin
+export const unarchiveAdmin = createAsyncThunk(
+  "superadmin/unarchiveAdmin",
+  async (id) => {
+    const response = await axios.patch(
+      `http://localhost:5000/api/superadmin/admins/${id}/unarchive`,
+      {},
+      {
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  }
+);
+
 const superAdminSlice = createSlice({
   name: "superAdmin",
   initialState,
@@ -111,11 +144,17 @@ const superAdminSlice = createSlice({
       })
       .addCase(getAllAdmins.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.adminList = action.payload.data;
+        state.adminList = action.payload.data || {
+          active: [],
+          archived: [],
+        };
       })
       .addCase(getAllAdmins.rejected, (state) => {
         state.isLoading = false;
-        state.adminList = [];
+        state.adminList = {
+          active: [],
+          archived: [],
+        };
       })
       // Get statistics
       .addCase(getUserStatistics.pending, (state) => {
@@ -156,6 +195,26 @@ const superAdminSlice = createSlice({
         state.isLoading = false;
       })
       .addCase(deleteAdmin.rejected, (state) => {
+        state.isLoading = false;
+      })
+      // Archive admin
+      .addCase(archiveAdmin.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(archiveAdmin.fulfilled, (state) => {
+        state.isLoading = false;
+      })
+      .addCase(archiveAdmin.rejected, (state) => {
+        state.isLoading = false;
+      })
+      // Unarchive admin
+      .addCase(unarchiveAdmin.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(unarchiveAdmin.fulfilled, (state) => {
+        state.isLoading = false;
+      })
+      .addCase(unarchiveAdmin.rejected, (state) => {
         state.isLoading = false;
       });
   },

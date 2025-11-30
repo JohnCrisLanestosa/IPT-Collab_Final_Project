@@ -51,11 +51,68 @@ export const editProduct = createAsyncThunk(
   }
 );
 
-export const deleteProduct = createAsyncThunk(
-  "/products/deleteProduct",
-  async (id) => {
-    const result = await axios.delete(
-      `http://localhost:5000/api/admin/products/delete/${id}`
+export const lockProduct = createAsyncThunk(
+  "/products/lockProduct",
+  async ({ id, userId, userName }) => {
+    const result = await axios.post(
+      `http://localhost:5000/api/admin/products/lock/${id}`,
+      { userId, userName },
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    return result?.data;
+  }
+);
+
+export const unlockProduct = createAsyncThunk(
+  "/products/unlockProduct",
+  async ({ id, userId }) => {
+    const result = await axios.post(
+      `http://localhost:5000/api/admin/products/unlock/${id}`,
+      { userId },
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    return result?.data;
+  }
+);
+
+export const archiveProduct = createAsyncThunk(
+  "/products/archiveProduct",
+  async ({ id, adminId }) => {
+    const result = await axios.post(
+      `http://localhost:5000/api/admin/products/archive/${id}`,
+      { adminId },
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    return result?.data;
+  }
+);
+
+export const unarchiveProduct = createAsyncThunk(
+  "/products/unarchiveProduct",
+  async ({ id, adminId }) => {
+    const result = await axios.post(
+      `http://localhost:5000/api/admin/products/unarchive/${id}`,
+      { adminId },
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
     );
 
     return result?.data;

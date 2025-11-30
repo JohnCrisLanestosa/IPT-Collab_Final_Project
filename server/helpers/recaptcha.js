@@ -28,14 +28,7 @@ async function verifyRecaptcha(token) {
       console.error("reCAPTCHA verification failed:", errorCodes);
       return false;
     }
-
-    // For reCAPTCHA v2, there's no score
-    // For reCAPTCHA v3, you might want to check the score
-    // if (score && score < 0.5) {
-    //   console.warn("reCAPTCHA score too low:", score);
-    //   return false;
-    // }
-
+    
     return true;
   } catch (error) {
     console.error("Error verifying reCAPTCHA:", error.message);

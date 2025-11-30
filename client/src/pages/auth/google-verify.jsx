@@ -93,15 +93,15 @@ function GoogleVerify() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
-      <div className="w-full max-w-md space-y-8 rounded-lg bg-white p-8 shadow-lg">
+    <div className="flex min-h-screen items-center justify-center bg-[#041b3a] px-4">
+      <div className="w-full max-w-md space-y-8 rounded-2xl bg-[#072040] p-8 shadow-2xl shadow-blue-950/50 border border-blue-900">
         {/* Success Badge */}
         {userType === "signup" ? (
-          <div className="rounded-md bg-green-50 p-4 border border-green-200">
+          <div className="rounded-md bg-emerald-900/50 p-4 border border-emerald-500/60">
             <div className="flex">
               <div className="flex-shrink-0">
                 <svg
-                  className="h-5 w-5 text-green-400"
+                  className="h-5 w-5 text-emerald-300"
                   viewBox="0 0 20 20"
                   fill="currentColor"
                 >
@@ -113,18 +113,18 @@ function GoogleVerify() {
                 </svg>
               </div>
               <div className="ml-3">
-                <p className="text-sm font-medium text-green-800">
+                <p className="text-sm font-medium text-emerald-100">
                   Account created successfully! 🎉
                 </p>
               </div>
             </div>
           </div>
         ) : (
-          <div className="rounded-md bg-blue-50 p-4 border border-blue-200">
+          <div className="rounded-md bg-blue-900/60 p-4 border border-blue-600/70">
             <div className="flex">
               <div className="flex-shrink-0">
                 <svg
-                  className="h-5 w-5 text-blue-400"
+                  className="h-5 w-5 text-blue-300"
                   viewBox="0 0 20 20"
                   fill="currentColor"
                 >
@@ -136,7 +136,7 @@ function GoogleVerify() {
                 </svg>
               </div>
               <div className="ml-3">
-                <p className="text-sm font-medium text-blue-800">
+                <p className="text-sm font-medium text-blue-100">
                   Authenticated successfully! ✓
                 </p>
               </div>
@@ -145,9 +145,9 @@ function GoogleVerify() {
         )}
         
         <div className="text-center">
-          <div className="mx-auto h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center mb-4">
+          <div className="mx-auto h-12 w-12 rounded-full bg-blue-900/60 flex items-center justify-center mb-4">
             <svg
-              className="h-6 w-6 text-blue-600"
+              className="h-6 w-6 text-blue-200"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -164,25 +164,25 @@ function GoogleVerify() {
           {/* Dynamic Title and Message based on user type */}
           {userType === "signup" ? (
             <>
-              <h2 className="text-2xl font-bold text-gray-900">
+              <h2 className="text-2xl font-bold text-blue-50">
                 Welcome! Registration Almost Complete
               </h2>
-              <p className="mt-2 text-sm text-gray-600">
+              <p className="mt-2 text-sm text-blue-200">
                 Your Google account has been successfully created.
               </p>
-              <p className="mt-1 text-sm text-gray-600">
+              <p className="mt-1 text-sm text-blue-200">
                 Please complete the security verification below to finish your registration.
               </p>
             </>
           ) : (
             <>
-              <h2 className="text-2xl font-bold text-gray-900">
+              <h2 className="text-2xl font-bold text-blue-50">
                 Welcome Back! One More Step
               </h2>
-              <p className="mt-2 text-sm text-gray-600">
+              <p className="mt-2 text-sm text-blue-200">
                 You've successfully authenticated with Google.
               </p>
-              <p className="mt-1 text-sm text-gray-600">
+              <p className="mt-1 text-sm text-blue-200">
                 Please complete the security verification below to continue.
               </p>
             </>
@@ -197,13 +197,13 @@ function GoogleVerify() {
           <Button
             onClick={handleContinue}
             disabled={!recaptchaToken || isVerifying}
-            className="w-full"
+            className="w-full bg-blue-500 hover:bg-blue-400 text-white disabled:opacity-70 disabled:bg-blue-500"
           >
             {isVerifying ? "Verifying..." : "Continue to Home"}
           </Button>
 
           {/* Info Text */}
-          <p className="text-center text-xs text-gray-500">
+          <p className="text-center text-xs text-blue-300">
             This verification helps us ensure the security of your account
           </p>
         </div>

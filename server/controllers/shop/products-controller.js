@@ -40,7 +40,23 @@ const getFilteredProducts = async (req, res) => {
         break;
     }
 
-    const products = await Product.find(filters).sort(sort);
+    // Exclude archived products from shop view
+    // Include products where isArchived is false, null, or undefined (for products created before the field was added)
+    // Use $and to properly combine with existing filters
+    const archivedFilter = {
+      $or: [
+        { isArchived: false },
+        { isArchived: { $exists: false } },
+        { isArchived: null },
+      ],
+    };
+
+    // Combine existing filters with archived filter
+    const finalFilters = Object.keys(filters).length > 0
+      ? { $and: [filters, archivedFilter] }
+      : archivedFilter;
+
+    const products = await Product.find(finalFilters).sort(sort);
 
     res.status(200).json({
       success: true,
@@ -65,6 +81,14 @@ const getProductDetails = async (req, res) => {
         success: false,
         message: "Product not found!",
       });
+
+    // Check if product is archived
+    if (product.isArchived) {
+      return res.status(404).json({
+        success: false,
+        message: "Product not found!",
+      });
+    }
 
     res.status(200).json({
       success: true,

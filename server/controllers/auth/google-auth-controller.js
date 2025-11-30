@@ -11,6 +11,15 @@ const googleAuthSuccess = (req, res) => {
       return res.redirect(`${process.env.CLIENT_URL}/auth/login?error=authentication_failed`);
     }
 
+    if (user.isArchived) {
+      const archivedMessage = encodeURIComponent(
+        "This account has been archived. Please contact a superadmin to regain access."
+      );
+      return res.redirect(
+        `${process.env.CLIENT_URL}/auth/login?archivedMessage=${archivedMessage}`
+      );
+    }
+
     // Check if new user tried to login instead of register
     if (user.isNewUser && fromPage === "login") {
       // New user came from login page - redirect them to register

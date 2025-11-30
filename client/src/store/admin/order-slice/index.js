@@ -8,9 +8,9 @@ const initialState = {
 
 export const getAllOrdersForAdmin = createAsyncThunk(
   "/order/getAllOrdersForAdmin",
-  async () => {
+  async (archived = false) => {
     const response = await axios.get(
-      `http://localhost:5000/api/admin/orders/get`
+      `http://localhost:5000/api/admin/orders/get?archived=${archived}`
     );
 
     return response.data;
@@ -36,6 +36,28 @@ export const updateOrderStatus = createAsyncThunk(
       {
         orderStatus,
       }
+    );
+
+    return response.data;
+  }
+);
+
+export const archiveOrder = createAsyncThunk(
+  "/order/archiveOrder",
+  async (id) => {
+    const response = await axios.put(
+      `http://localhost:5000/api/admin/orders/archive/${id}`
+    );
+
+    return response.data;
+  }
+);
+
+export const unarchiveOrder = createAsyncThunk(
+  "/order/unarchiveOrder",
+  async (id) => {
+    const response = await axios.put(
+      `http://localhost:5000/api/admin/orders/unarchive/${id}`
     );
 
     return response.data;
@@ -75,6 +97,24 @@ const adminOrderSlice = createSlice({
       .addCase(getOrderDetailsForAdmin.rejected, (state) => {
         state.isLoading = false;
         state.orderDetails = null;
+      })
+      .addCase(archiveOrder.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(archiveOrder.fulfilled, (state) => {
+        state.isLoading = false;
+      })
+      .addCase(archiveOrder.rejected, (state) => {
+        state.isLoading = false;
+      })
+      .addCase(unarchiveOrder.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(unarchiveOrder.fulfilled, (state) => {
+        state.isLoading = false;
+      })
+      .addCase(unarchiveOrder.rejected, (state) => {
+        state.isLoading = false;
       });
   },
 });

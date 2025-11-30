@@ -12,11 +12,13 @@ import { Label } from "../ui/label";
 import StarRatingComponent from "../common/star-rating";
 import { useEffect, useState } from "react";
 import { addReview, getReviews } from "@/store/shop/review-slice";
+import { useNavigate } from "react-router-dom";
 
 function ProductDetailsDialog({ open, setOpen, productDetails }) {
   const [reviewMsg, setReviewMsg] = useState("");
   const [rating, setRating] = useState(0);
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const { user } = useSelector((state) => state.auth);
   const { cartItems } = useSelector((state) => state.shopCart);
   const { reviews } = useSelector((state) => state.shopReview);
@@ -29,7 +31,7 @@ function ProductDetailsDialog({ open, setOpen, productDetails }) {
     setRating(getRating);
   }
 
-  function handleAddToCart(getCurrentProductId, getTotalStock) {
+  function handleAddToCart(getCurrentProductId, getTotalStock, shouldNavigateToCheckout = false) {
     let getCartItems = cartItems || [];
 
     if (getCartItems.length) {
@@ -56,12 +58,23 @@ function ProductDetailsDialog({ open, setOpen, productDetails }) {
       })
     ).then((data) => {
       if (data?.payload?.success) {
-        dispatch(fetchCartItems(user?.id));
-        toast({
-          title: "Product is added to cart",
+        dispatch(fetchCartItems(user?.id)).then(() => {
+          if (shouldNavigateToCheckout) {
+            handleDialogClose();
+            navigate("/shop/checkout");
+          } else {
+            toast({
+              title: "Product is added to cart",
+              variant: "success",
+            });
+          }
         });
       }
     });
+  }
+
+  function handleBuyNow(getCurrentProductId, getTotalStock) {
+    handleAddToCart(getCurrentProductId, getTotalStock, true);
   }
 
   function handleDialogClose() {
@@ -87,6 +100,7 @@ function ProductDetailsDialog({ open, setOpen, productDetails }) {
         dispatch(getReviews(productDetails?._id));
         toast({
           title: "Review added successfully!",
+          variant: "success",
         });
       }
     });
@@ -104,29 +118,40 @@ function ProductDetailsDialog({ open, setOpen, productDetails }) {
         reviews.length
       : 0;
 
+  const isOutOfStock = productDetails?.totalStock === 0;
+
   return (
     <Dialog open={open} onOpenChange={handleDialogClose}>
       <DialogContent className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-8 p-4 sm:p-6 max-w-[95vw] sm:max-w-[90vw] lg:max-w-[80vw] max-h-[90vh] overflow-y-auto">
-        <div className="relative overflow-hidden rounded-lg max-h-[40vh] lg:max-h-full">
+        <div className={`relative rounded-lg bg-muted/30 flex items-center justify-center p-4 max-h-[40vh] lg:max-h-[600px] ${isOutOfStock ? 'grayscale opacity-75' : ''}`}>
           <img
             src={productDetails?.image}
             alt={productDetails?.title}
-            width={600}
-            height={600}
-            className="aspect-square w-full object-cover"
+            className={`max-w-full max-h-full object-contain rounded ${isOutOfStock ? 'grayscale' : ''}`}
           />
         </div>
         <div className="flex flex-col">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold">{productDetails?.title}</h1>
+            <h1 className={`text-2xl sm:text-3xl font-extrabold ${isOutOfStock ? 'text-gray-600' : ''}`}>{productDetails?.title}</h1>
             <p className="text-muted-foreground text-base sm:text-lg mb-4 mt-2 sm:mb-5 sm:mt-4">
               {productDetails?.description}
             </p>
           </div>
           <div className="flex items-center justify-between">
-            <p className="text-2xl sm:text-3xl font-bold text-primary">
+            <p className={`text-2xl sm:text-3xl font-bold ${isOutOfStock ? 'text-gray-600' : 'text-primary'}`}>
               ₱{productDetails?.price}
             </p>
+            <div className={`text-sm font-semibold px-3 py-1 rounded ${
+              productDetails?.totalStock === 0 
+                ? "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400" 
+                : productDetails?.totalStock < 10 
+                ? "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400"
+                : "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+            }`}>
+              {productDetails?.totalStock === 0 
+                ? "Out of Stock" 
+                : `${productDetails?.totalStock} available`}
+            </div>
           </div>
           <div className="flex items-center gap-2 mt-2">
             <div className="flex items-center gap-0.5">
@@ -136,23 +161,36 @@ function ProductDetailsDialog({ open, setOpen, productDetails }) {
               ({averageReview.toFixed(2)})
             </span>
           </div>
-          <div className="mt-4 mb-4 sm:mt-5 sm:mb-5">
+          <div className="mt-4 mb-4 sm:mt-5 sm:mb-5 flex gap-3">
             {productDetails?.totalStock === 0 ? (
               <Button className="w-full opacity-60 cursor-not-allowed">
                 Out of Stock
               </Button>
             ) : (
-              <Button
-                className="w-full"
-                onClick={() =>
-                  handleAddToCart(
-                    productDetails?._id,
-                    productDetails?.totalStock
-                  )
-                }
-              >
-                Add to Cart
-              </Button>
+              <>
+                <Button
+                  className="flex-1"
+                  onClick={() =>
+                    handleAddToCart(
+                      productDetails?._id,
+                      productDetails?.totalStock
+                    )
+                  }
+                >
+                  Add to Cart
+                </Button>
+                <Button
+                  className="flex-1"
+                  onClick={() =>
+                    handleBuyNow(
+                      productDetails?._id,
+                      productDetails?.totalStock
+                    )
+                  }
+                >
+                  Buy Now
+                </Button>
+              </>
             )}
           </div>
           <Separator />

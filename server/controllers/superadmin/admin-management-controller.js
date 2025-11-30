@@ -1,17 +1,31 @@
 const bcrypt = require("bcryptjs");
 const User = require("../../models/User");
+const { isPasswordStrong } = require("../../helpers/password-validator");
 
 // Get all admins (excluding superadmins)
 const getAllAdmins = async (req, res) => {
   try {
-    // Only show regular admins, not superadmins
-    const admins = await User.find({ 
-      role: "admin" 
-    }).select("-password").sort({ createdAt: -1 });
+    const [activeAdmins, archivedAdmins] = await Promise.all([
+      User.find({
+        role: "admin",
+        isArchived: { $ne: true },
+      })
+        .select("-password")
+        .sort({ createdAt: -1 }),
+      User.find({
+        role: "admin",
+        isArchived: true,
+      })
+        .select("-password")
+        .sort({ archivedAt: -1, createdAt: -1 }),
+    ]);
 
     res.status(200).json({
       success: true,
-      data: admins,
+      data: {
+        active: activeAdmins,
+        archived: archivedAdmins,
+      },
     });
   } catch (error) {
     console.log(error);
@@ -26,9 +40,14 @@ const getAllAdmins = async (req, res) => {
 const getUserStatistics = async (req, res) => {
   try {
     const totalUsers = await User.countDocuments({ role: "user" });
-    const totalAdmins = await User.countDocuments({ role: "admin" });
+    const totalAdmins = await User.countDocuments({
+      role: "admin",
+      isArchived: { $ne: true },
+    });
     const totalSuperAdmins = await User.countDocuments({ role: "superadmin" });
-    const totalAll = await User.countDocuments();
+    const totalAll = await User.countDocuments({
+      isArchived: { $ne: true },
+    });
 
     res.status(200).json({
       success: true,
@@ -67,6 +86,14 @@ const createAdmin = async (req, res) => {
       return res.status(400).json({
         success: false,
         message: "User with this email already exists",
+      });
+    }
+
+    if (!isPasswordStrong(password)) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "Password must be at least 8 characters long and include a special character (e.g., !@#$%^&*).",
       });
     }
 
@@ -127,21 +154,25 @@ const updateAdmin = async (req, res) => {
       });
     }
 
-    // Check if email is being changed and if it's already taken
+    // Prevent email changes via update endpoint
     if (email && email !== admin.email) {
-      const existingUser = await User.findOne({ email });
-      if (existingUser) {
-        return res.status(400).json({
-          success: false,
-          message: "Email already in use",
-        });
-      }
-      admin.email = email;
+      return res.status(400).json({
+        success: false,
+        message:
+          "Updating an admin's email is not allowed. Create a new admin account instead.",
+      });
     }
 
     // Update fields
     if (userName) admin.userName = userName;
     if (password) {
+      if (!isPasswordStrong(password)) {
+        return res.status(400).json({
+          success: false,
+          message:
+            "Password must be at least 8 characters long and include a special character (e.g., !@#$%^&*).",
+        });
+      }
       admin.password = await bcrypt.hash(password, 12);
     }
 
@@ -249,6 +280,96 @@ const toggleAdminStatus = async (req, res) => {
   }
 };
 
+// Archive admin
+const archiveAdmin = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const admin = await User.findById(id);
+    if (!admin) {
+      return res.status(404).json({
+        success: false,
+        message: "Admin not found",
+      });
+    }
+
+    if (admin.role !== "admin") {
+      return res.status(403).json({
+        success: false,
+        message: "Can only manage admin accounts",
+      });
+    }
+
+    if (admin.isArchived) {
+      return res.status(400).json({
+        success: false,
+        message: "Admin is already archived",
+      });
+    }
+
+    admin.isArchived = true;
+    admin.archivedAt = new Date();
+    await admin.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Admin archived successfully",
+      data: admin,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      success: false,
+      message: "Error archiving admin",
+    });
+  }
+};
+
+// Unarchive admin
+const unarchiveAdmin = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const admin = await User.findById(id);
+    if (!admin) {
+      return res.status(404).json({
+        success: false,
+        message: "Admin not found",
+      });
+    }
+
+    if (admin.role !== "admin") {
+      return res.status(403).json({
+        success: false,
+        message: "Can only manage admin accounts",
+      });
+    }
+
+    if (!admin.isArchived) {
+      return res.status(400).json({
+        success: false,
+        message: "Admin is not archived",
+      });
+    }
+
+    admin.isArchived = false;
+    admin.archivedAt = null;
+    await admin.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Admin unarchived successfully",
+      data: admin,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      success: false,
+      message: "Error unarchiving admin",
+    });
+  }
+};
+
 module.exports = {
   getAllAdmins,
   getUserStatistics,
@@ -256,5 +377,7 @@ module.exports = {
   updateAdmin,
   deleteAdmin,
   toggleAdminStatus,
+  archiveAdmin,
+  unarchiveAdmin,
 };
 

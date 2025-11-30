@@ -9,6 +9,31 @@ const ProductSchema = new mongoose.Schema(
     price: Number,
     totalStock: Number,
     averageReview: Number,
+    isArchived: {
+      type: Boolean,
+      default: false,
+    },
+    // Two-Phase Locking fields
+    isLocked: {
+      type: Boolean,
+      default: false,
+    },
+    lockedBy: {
+      type: String,
+      default: null,
+    },
+    lockedByName: {
+      type: String,
+      default: null,
+    },
+    lockedAt: {
+      type: Date,
+      default: null,
+    },
+    lockExpiry: {
+      type: Date,
+      default: null,
+    },
   },
   { timestamps: true }
 );

@@ -2,6 +2,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../../models/User");
 const { verifyRecaptcha } = require("../../helpers/recaptcha");
+const { isPasswordStrong } = require("../../helpers/password-validator");
 
 //register
 const registerUser = async (req, res) => {
@@ -23,6 +24,14 @@ const registerUser = async (req, res) => {
         success: false,
         message: "User Already exists with the same email! Please try again",
       });
+
+    if (!isPasswordStrong(password)) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "Password must be at least 8 characters long and include a special character (e.g., !@#$%^&*).",
+      });
+    }
 
     const hashPassword = await bcrypt.hash(password, 12);
     const newUser = new User({
@@ -81,14 +90,23 @@ const loginUser = async (req, res) => {
 
     const checkUser = await User.findOne({ email });
     if (!checkUser)
-      return res.json({
+      return res.status(401).json({
         success: false,
-        message: "User doesn't exists! Please register first",
+        message: "Account does not exist. Please register first.",
+        code: "USER_NOT_FOUND",
       });
+
+    // Prevent archived accounts from logging in
+    if (checkUser.isArchived) {
+      return res.status(403).json({
+        success: false,
+        message: "This account has been archived. Please contact a superadmin to regain access.",
+      });
+    }
 
     // Check if user registered with Google OAuth
     if (checkUser.authProvider === 'google' && !checkUser.password) {
-      return res.json({
+      return res.status(400).json({
         success: false,
         message: "This account uses Google Sign-In. Please use 'Continue with Google' to login.",
       });
@@ -99,9 +117,9 @@ const loginUser = async (req, res) => {
       checkUser.password
     );
     if (!checkPasswordMatch)
-      return res.json({
+      return res.status(401).json({
         success: false,
-        message: "Incorrect password! Please try again",
+        message: "Invalid email or password. Please check your credentials and try again.",
       });
 
     // Check if this is the user's first login
@@ -162,7 +180,31 @@ const authMiddleware = async (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded;
+    const user = await User.findById(decoded.id);
+
+    if (!user) {
+      res.clearCookie("token");
+      return res.status(401).json({
+        success: false,
+        message: "Account not found",
+      });
+    }
+
+    if (user.isArchived) {
+      res.clearCookie("token");
+      return res.status(403).json({
+        success: false,
+        message:
+          "This account has been archived. Please contact a superadmin for assistance.",
+      });
+    }
+
+    req.user = {
+      id: user._id.toString(),
+      role: user.role,
+      email: user.email,
+      userName: user.userName,
+    };
     next();
   } catch (error) {
     res.status(401).json({

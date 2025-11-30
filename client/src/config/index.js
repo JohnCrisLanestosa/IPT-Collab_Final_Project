@@ -5,6 +5,7 @@ export const registerFormControls = [
     placeholder: "Enter your user name",
     componentType: "input",
     type: "text",
+    required: true,
   },
   {
     name: "email",
@@ -12,6 +13,7 @@ export const registerFormControls = [
     placeholder: "Enter your email",
     componentType: "input",
     type: "email",
+    required: true,
   },
   {
     name: "password",
@@ -19,6 +21,9 @@ export const registerFormControls = [
     placeholder: "Enter your password",
     componentType: "input",
     type: "password",
+    required: true,
+    helperText:
+      "Minimum 8 characters with at least one special character (e.g., !@#$%^&*).",
   },
 ];
 
@@ -41,27 +46,29 @@ export const loginFormControls = [
 
 export const addProductFormElements = [
   {
-    label: "Title",
+    label: "Category",
+    name: "category",
+    componentType: "select",
+    options: [
+      { id: "pe-uniform", label: "P.E Uniform" },
+      { id: "souvenirs", label: "Souvenirs" },
+      { id: "books", label: "Books" },
+      { id: "clothing", label: "Clothing" },
+      { id: "accessories", label: "Accessories" },
+    ],
+  },
+  {
+    label: "Product Name",
     name: "title",
     componentType: "input",
     type: "text",
-    placeholder: "Enter product title",
+    placeholder: "Enter product name",
   },
   {
     label: "Description",
     name: "description",
     componentType: "textarea",
     placeholder: "Enter product description",
-  },
-  {
-    label: "Category",
-    name: "category",
-    componentType: "select",
-    options: [
-      { id: "pe-uniform", label: "P.E Uniform" },
-      { id: "books", label: "Books" },
-      { id: "accessories", label: "Accessories" },
-    ],
   },
   {
     label: "Price",
@@ -96,8 +103,18 @@ export const shoppingViewHeaderMenuItems = [
     path: "/shop/listing",
   },
   {
+    id: "souvenirs",
+    label: "Souvenirs",
+    path: "/shop/listing",
+  },
+  {
     id: "books",
     label: "Books",
+    path: "/shop/listing",
+  },
+  {
+    id: "clothing",
+    label: "Clothing",
     path: "/shop/listing",
   },
   {
@@ -114,7 +131,9 @@ export const shoppingViewHeaderMenuItems = [
 
 export const categoryOptionsMap = {
   "pe-uniform": "P.E Uniform",
+  souvenirs: "Souvenirs",
   books: "Books",
+  clothing: "Clothing",
   accessories: "Accessories",
 };
 
@@ -122,7 +141,9 @@ export const categoryOptionsMap = {
 export const filterOptions = {
   category: [
     { id: "pe-uniform", label: "P.E Uniform" },
+    { id: "souvenirs", label: "Souvenirs" },
     { id: "books", label: "Books" },
+    { id: "clothing", label: "Clothing" },
     { id: "accessories", label: "Accessories" },
   ],
 };

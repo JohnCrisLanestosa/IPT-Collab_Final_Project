@@ -14,10 +14,22 @@ const searchProducts = async (req, res) => {
     const regEx = new RegExp(keyword, "i");
 
     const createSearchQuery = {
-      $or: [
-        { title: regEx },
-        { description: regEx },
-        { category: regEx },
+      $and: [
+        {
+          $or: [
+            { title: regEx },
+            { description: regEx },
+            { category: regEx },
+          ],
+        },
+        {
+          // Exclude archived products from search results
+          $or: [
+            { isArchived: false },
+            { isArchived: { $exists: false } },
+            { isArchived: null },
+          ],
+        },
       ],
     };
 

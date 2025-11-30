@@ -12,6 +12,8 @@ import AdminFeatures from "./pages/admin-view/features";
 import SuperAdminLayout from "./components/superadmin-view/layout";
 import SuperAdminDashboard from "./pages/superadmin-view/dashboard";
 import AdminManagement from "./pages/superadmin-view/admins";
+import SuperAdminReports from "./pages/superadmin-view/reports";
+import ActivityLogs from "./pages/superadmin-view/activity-logs";
 import AdminProfile from "./pages/admin-view/profile";
 import ShoppingLayout from "./components/shopping-view/layout";
 import NotFound from "./pages/not-found";
@@ -85,6 +87,8 @@ function App() {
           <Route path="admins" element={<AdminManagement />} />
           <Route path="products" element={<AdminProducts />} />
           <Route path="orders" element={<AdminOrders />} />
+          <Route path="activity-logs" element={<ActivityLogs />} />
+          <Route path="reports" element={<SuperAdminReports />} />
           <Route path="profile" element={<AdminProfile />} />
         </Route>
         <Route

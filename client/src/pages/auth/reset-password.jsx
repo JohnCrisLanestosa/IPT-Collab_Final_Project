@@ -8,6 +8,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Lock, Eye, EyeOff, CheckCircle2, XCircle } from "lucide-react";
 
+const PASSWORD_REQUIREMENTS_MESSAGE =
+  "Password must be at least 8 characters and include a special character (e.g., !@#$%^&*).";
+
 function ResetPassword() {
   const { token } = useParams();
   const [password, setPassword] = useState("");
@@ -72,10 +75,12 @@ function ResetPassword() {
       return;
     }
 
-    if (password.length < 6) {
+    const hasRequiredPasswordLength = password.length >= 8;
+    const hasSpecialCharacter = /[^A-Za-z0-9]/.test(password);
+
+    if (!hasRequiredPasswordLength || !hasSpecialCharacter) {
       toast({
-        title: "Password too short",
-        description: "Password must be at least 6 characters long",
+        title: PASSWORD_REQUIREMENTS_MESSAGE,
         variant: "destructive",
       });
       return;
@@ -102,6 +107,7 @@ function ResetPassword() {
         toast({
           title: "Success!",
           description: result.message,
+          variant: "success",
         });
         
         // Redirect to login after 3 seconds
@@ -131,8 +137,8 @@ function ResetPassword() {
     return (
       <div className="mx-auto w-full max-w-md space-y-6">
         <div className="text-center space-y-4">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-          <p className="text-muted-foreground">Verifying reset link...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-400 mx-auto"></div>
+          <p className="text-blue-200">Verifying reset link...</p>
         </div>
       </div>
     );
@@ -144,23 +150,23 @@ function ResetPassword() {
       <div className="mx-auto w-full max-w-md space-y-6">
         <div className="text-center space-y-4">
           <div className="flex justify-center">
-            <div className="rounded-full bg-red-100 p-3">
-              <XCircle className="h-12 w-12 text-red-600" />
+            <div className="rounded-full bg-red-500/20 border border-red-400/50 p-3">
+              <XCircle className="h-12 w-12 text-red-400" />
             </div>
           </div>
-          <h1 className="text-3xl font-bold tracking-tight text-foreground">
+          <h1 className="text-3xl font-bold tracking-tight text-blue-50">
             Invalid or Expired Link
           </h1>
-          <p className="text-muted-foreground">
+          <p className="text-blue-200">
             This password reset link is invalid or has expired. Password reset
             links are only valid for 1 hour.
           </p>
           <div className="space-y-2 pt-4">
             <Link to="/auth/forgot-password">
-              <Button className="w-full">Request New Reset Link</Button>
+              <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white">Request New Reset Link</Button>
             </Link>
             <Link to="/auth/login">
-              <Button variant="outline" className="w-full">
+              <Button variant="outline" className="w-full border-blue-400/50 text-blue-300 hover:bg-blue-900/30">
                 Back to Login
               </Button>
             </Link>
@@ -176,24 +182,24 @@ function ResetPassword() {
       <div className="mx-auto w-full max-w-md space-y-6">
         <div className="text-center space-y-4">
           <div className="flex justify-center">
-            <div className="rounded-full bg-green-100 p-3">
-              <CheckCircle2 className="h-12 w-12 text-green-600" />
+            <div className="rounded-full bg-green-500/20 border border-green-400/50 p-3">
+              <CheckCircle2 className="h-12 w-12 text-green-400" />
             </div>
           </div>
-          <h1 className="text-3xl font-bold tracking-tight text-foreground">
+          <h1 className="text-3xl font-bold tracking-tight text-blue-50">
             Password Reset Successful!
           </h1>
-          <p className="text-muted-foreground">
+          <p className="text-blue-200">
             Your password has been successfully reset. You can now log in with
             your new password.
           </p>
-          <div className="bg-green-50 border border-green-200 rounded-lg p-4 text-sm">
-            <p className="text-green-800">
+          <div className="bg-green-500/10 border border-green-400/30 rounded-lg p-4 text-sm">
+            <p className="text-green-300">
               Redirecting to login page in 3 seconds...
             </p>
           </div>
           <Link to="/auth/login">
-            <Button className="w-full">Go to Login Now</Button>
+            <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white">Go to Login Now</Button>
           </Link>
         </div>
       </div>
@@ -204,14 +210,14 @@ function ResetPassword() {
   return (
     <div className="mx-auto w-full max-w-md space-y-6">
       <div className="text-center">
-        <h1 className="text-3xl font-bold tracking-tight text-foreground">
+        <h1 className="text-3xl font-semibold tracking-tight text-blue-50">
           Reset Your Password
         </h1>
-        <p className="mt-2 text-muted-foreground">
+        <p className="mt-2 text-sm text-blue-200">
           {userEmail && (
             <>
               Creating new password for{" "}
-              <span className="font-semibold text-foreground">{userEmail}</span>
+              <span className="font-semibold text-blue-300">{userEmail}</span>
             </>
           )}
         </p>
@@ -219,22 +225,22 @@ function ResetPassword() {
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-2">
-          <Label htmlFor="password">New Password</Label>
+          <Label htmlFor="password" className="text-white font-medium">New Password</Label>
           <div className="relative">
-            <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+            <Lock className="absolute left-3 top-3 h-4 w-4 text-blue-400 z-10" />
             <Input
               id="password"
               type={showPassword ? "text" : "password"}
               placeholder="Enter new password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="pl-10 pr-10"
+              className="pl-10 pr-10 !bg-white !text-gray-900 placeholder:!text-gray-400 !border-gray-300 focus:!border-blue-500 focus:!ring-blue-500"
               disabled={isLoading}
             />
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-3 text-muted-foreground hover:text-foreground"
+              className="absolute right-3 top-3 text-blue-400 hover:text-blue-300 transition-colors z-10"
             >
               {showPassword ? (
                 <EyeOff className="h-4 w-4" />
@@ -243,28 +249,28 @@ function ResetPassword() {
               )}
             </button>
           </div>
-          <p className="text-xs text-muted-foreground">
-            Must be at least 6 characters
+          <p className="text-xs text-blue-200">
+            Minimum 8 characters with at least one special character (e.g., !@#$%^&*).
           </p>
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="confirmPassword">Confirm New Password</Label>
+          <Label htmlFor="confirmPassword" className="text-white font-medium">Confirm New Password</Label>
           <div className="relative">
-            <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+            <Lock className="absolute left-3 top-3 h-4 w-4 text-blue-400 z-10" />
             <Input
               id="confirmPassword"
               type={showConfirmPassword ? "text" : "password"}
               placeholder="Confirm new password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              className="pl-10 pr-10"
+              className="pl-10 pr-10 !bg-white !text-gray-900 placeholder:!text-gray-400 !border-gray-300 focus:!border-blue-500 focus:!ring-blue-500"
               disabled={isLoading}
             />
             <button
               type="button"
               onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-              className="absolute right-3 top-3 text-muted-foreground hover:text-foreground"
+              className="absolute right-3 top-3 text-blue-400 hover:text-blue-300 transition-colors z-10"
             >
               {showConfirmPassword ? (
                 <EyeOff className="h-4 w-4" />
@@ -279,15 +285,19 @@ function ResetPassword() {
           <div
             className={`text-sm p-2 rounded ${
               password === confirmPassword
-                ? "bg-green-50 text-green-700"
-                : "bg-red-50 text-red-700"
+                ? "bg-green-500/10 border border-green-400/30 text-green-300"
+                : "bg-red-500/10 border border-red-400/30 text-red-300"
             }`}
           >
             {password === confirmPassword ? "✓ Passwords match" : "✗ Passwords don't match"}
           </div>
         )}
 
-        <Button type="submit" className="w-full" disabled={isLoading}>
+        <Button 
+          type="submit" 
+          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-lg transition-colors" 
+          disabled={isLoading}
+        >
           {isLoading ? "Resetting Password..." : "Reset Password"}
         </Button>
       </form>
@@ -295,7 +305,7 @@ function ResetPassword() {
       <div className="text-center">
         <Link
           to="/auth/login"
-          className="text-sm text-primary hover:underline"
+          className="text-sm font-medium text-blue-300 hover:text-blue-200 transition-colors"
         >
           Back to Login
         </Link>

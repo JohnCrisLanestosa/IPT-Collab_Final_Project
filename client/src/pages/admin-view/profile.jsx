@@ -51,6 +51,7 @@ function AdminProfile() {
         toast({
           title: "Success",
           description: "Profile updated successfully",
+          variant: "success",
         });
         setIsEditing(false);
         setImageFile(null);
@@ -247,6 +248,7 @@ function AdminProfile() {
                                 toast({
                                   title: "Image uploaded",
                                   description: "Profile picture uploaded successfully",
+                                  variant: "success",
                                 });
                               }
                             })
@@ -309,6 +311,8 @@ function AdminProfile() {
                   id="email"
                   type="email"
                   value={formData.email}
+                  disabled
+                  readOnly
                   onChange={(e) =>
                     setFormData({ ...formData, email: e.target.value })
                   }

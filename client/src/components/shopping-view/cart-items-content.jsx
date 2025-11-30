@@ -54,6 +54,7 @@ function UserCartItemsContent({ cartItem }) {
       if (data?.payload?.success) {
         toast({
           title: "Cart item is updated successfully",
+          variant: "success",
         });
       }
     });
@@ -66,6 +67,7 @@ function UserCartItemsContent({ cartItem }) {
       if (data?.payload?.success) {
         toast({
           title: "Cart item is deleted successfully",
+          variant: "success",
         });
       }
     });
@@ -107,11 +109,14 @@ function UserCartItemsContent({ cartItem }) {
         <p className="font-semibold">
           ₱{(cartItem?.price * cartItem?.quantity).toFixed(2)}
         </p>
-        <Trash
+        <button
+          type="button"
           onClick={() => handleCartItemDelete(cartItem)}
-          className="cursor-pointer mt-1"
-          size={20}
-        />
+          className="mt-1 rounded-full p-2 text-destructive/70 transition-colors hover:bg-destructive/20 hover:text-destructive focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-destructive"
+          aria-label={`Remove ${cartItem?.title} from cart`}
+        >
+          <Trash size={16} />
+        </button>
       </div>
     </div>
   );

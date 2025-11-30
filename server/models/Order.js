@@ -39,7 +39,7 @@ const OrderSchema = new mongoose.Schema(
     },
     orderStatus: {
       type: String,
-      enum: ["pending", "inProcess", "inShipping", "delivered", "rejected"],
+      enum: ["pending", "confirmed", "readyForPickup", "pickedUp", "cancelled"],
       default: "pending",
     },
     paymentMethod: String,
@@ -47,6 +47,10 @@ const OrderSchema = new mongoose.Schema(
       type: String,
       enum: ["pending", "paid", "failed"],
       default: "pending",
+    },
+    paymentProof: {
+      type: String,
+      default: null,
     },
     totalAmount: {
       type: Number,
@@ -59,6 +63,18 @@ const OrderSchema = new mongoose.Schema(
     orderUpdateDate: {
       type: Date,
       default: Date.now,
+    },
+    confirmationDate: {
+      type: Date,
+      default: null,
+    },
+    paymentDeadline: {
+      type: Date,
+      default: null,
+    },
+    isArchived: {
+      type: Boolean,
+      default: false,
     },
   },
   { timestamps: true }

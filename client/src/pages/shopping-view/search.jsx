@@ -10,7 +10,10 @@ import {
 } from "@/store/shop/search-slice";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { X } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import BackButton from "@/components/common/back-button";
 
 function SearchProducts() {
   const [keyword, setKeyword] = useState("");
@@ -24,6 +27,7 @@ function SearchProducts() {
 
   const { cartItems } = useSelector((state) => state.shopCart);
   const { toast } = useToast();
+  const navigate = useNavigate();
   
   useEffect(() => {
     if (keyword && keyword.trim() !== "" && keyword.trim().length > 2) {
@@ -39,16 +43,27 @@ function SearchProducts() {
     }
   }, [keyword, dispatch, setSearchParams]);
 
-  function handleAddtoCart(getCurrentProductId, getTotalStock) {
-    console.log(cartItems);
-    let getCartItems = cartItems.items || [];
+  function getCartItemsList() {
+    if (Array.isArray(cartItems)) return cartItems;
+    if (Array.isArray(cartItems?.items)) return cartItems.items;
+    return [];
+  }
 
-    if (getCartItems.length) {
-      const indexOfCurrentItem = getCartItems.findIndex(
+  function attemptAddToCart(getCurrentProductId, getTotalStock, shouldNavigate) {
+    if (!user?.id) {
+      navigate("/auth/login");
+      return;
+    }
+
+    const existingCartItems = getCartItemsList();
+    const hasStockLimit = typeof getTotalStock === "number";
+
+    if (existingCartItems.length && hasStockLimit) {
+      const indexOfCurrentItem = existingCartItems.findIndex(
         (item) => item.productId === getCurrentProductId
       );
       if (indexOfCurrentItem > -1) {
-        const getQuantity = getCartItems[indexOfCurrentItem].quantity;
+        const getQuantity = existingCartItems[indexOfCurrentItem].quantity;
         if (getQuantity + 1 > getTotalStock) {
           toast({
             title: `Only ${getQuantity} quantity can be added for this item`,
@@ -68,12 +83,26 @@ function SearchProducts() {
       })
     ).then((data) => {
       if (data?.payload?.success) {
-        dispatch(fetchCartItems(user?.id));
-        toast({
-          title: "Product is added to cart",
+        dispatch(fetchCartItems(user?.id)).then(() => {
+          if (shouldNavigate) {
+            navigate("/shop/checkout");
+          } else {
+            toast({
+              title: "Product is added to cart",
+              variant: "success",
+            });
+          }
         });
       }
     });
+  }
+
+  function handleAddtoCart(getCurrentProductId, getTotalStock) {
+    attemptAddToCart(getCurrentProductId, getTotalStock, false);
+  }
+
+  function handleBuyNow(getCurrentProductId, getTotalStock) {
+    attemptAddToCart(getCurrentProductId, getTotalStock, true);
   }
 
   function handleGetProductDetails(getCurrentProductId) {
@@ -85,19 +114,40 @@ function SearchProducts() {
     if (productDetails !== null) setOpenDetailsDialog(true);
   }, [productDetails]);
 
+  function handleClearSearch() {
+    setKeyword("");
+    setSearchParams(new URLSearchParams());
+    dispatch(resetSearchResults());
+  }
+
   console.log(searchResults, "searchResults");
 
   return (
     <div className="container mx-auto md:px-6 px-4 py-8">
-      <div className="flex justify-center mb-8">
-        <div className="w-full flex items-center">
+      <div className="mb-4">
+        <BackButton fallbackPath="/shop/home" />
+      </div>
+      <div className="flex justify-start mb-8">
+        <div className="w-full max-w-2xl flex items-center relative">
           <Input
             value={keyword}
             name="keyword"
             onChange={(event) => setKeyword(event.target.value)}
-            className="py-6"
+            className="h-12 px-4 pr-12 text-base"
             placeholder="Search Products..."
           />
+          {keyword && (
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              onClick={handleClearSearch}
+              className="absolute right-2 h-8 w-8 rounded-full hover:bg-muted"
+            >
+              <X className="h-4 w-4" />
+              <span className="sr-only">Clear search</span>
+            </Button>
+          )}
         </div>
       </div>
       
@@ -132,6 +182,7 @@ function SearchProducts() {
                 key={item._id}
                 handleAddtoCart={handleAddtoCart}
                 product={item}
+                handleBuyNow={handleBuyNow}
                 handleGetProductDetails={handleGetProductDetails}
               />
             ))

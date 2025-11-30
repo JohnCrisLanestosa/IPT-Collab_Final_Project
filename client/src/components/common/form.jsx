@@ -9,7 +9,7 @@ import {
 } from "../ui/select";
 import { Textarea } from "../ui/textarea";
 import { Button } from "../ui/button";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { useState } from "react";
 
 function CommonForm({
@@ -19,6 +19,9 @@ function CommonForm({
   onSubmit,
   buttonText,
   isBtnDisabled,
+  beforeSubmitSlot,
+  isLoading,
+  loadingText,
 }) {
   // Track password visibility for each password field
   const [passwordVisibility, setPasswordVisibility] = useState({});
@@ -33,6 +36,8 @@ function CommonForm({
   function renderInputsByComponentType(getControlItem) {
     let element = null;
     const value = formData[getControlItem.name] || "";
+    const isFieldDisabled = Boolean(getControlItem.disabled);
+    const isFieldReadOnly = Boolean(getControlItem.readOnly);
     const isPasswordField = getControlItem.type === "password";
     const isPasswordVisible = passwordVisibility[getControlItem.name];
 
@@ -53,6 +58,9 @@ function CommonForm({
                 })
               }
               className={isPasswordField ? "pr-10" : ""}
+              required={getControlItem.required}
+              disabled={isFieldDisabled}
+              readOnly={isFieldReadOnly}
             />
             {isPasswordField && (
               <button
@@ -75,6 +83,7 @@ function CommonForm({
       case "select":
         element = (
           <Select
+            disabled={isFieldDisabled}
             onValueChange={(value) =>
               setFormData({
                 ...formData,
@@ -82,6 +91,7 @@ function CommonForm({
               })
             }
             value={value}
+            required={getControlItem.required}
           >
             <SelectTrigger className="w-full">
               <SelectValue placeholder={getControlItem.label} />
@@ -101,18 +111,20 @@ function CommonForm({
         break;
       case "textarea":
         element = (
-          <Textarea
-            name={getControlItem.name}
-            placeholder={getControlItem.placeholder}
-            id={getControlItem.id}
-            value={value}
-            onChange={(event) =>
-              setFormData({
-                ...formData,
-                [getControlItem.name]: event.target.value,
-              })
-            }
-          />
+            <Textarea
+              name={getControlItem.name}
+              placeholder={getControlItem.placeholder}
+              id={getControlItem.id}
+              value={value}
+              onChange={(event) =>
+                setFormData({
+                  ...formData,
+                  [getControlItem.name]: event.target.value,
+                })
+              }
+              disabled={isFieldDisabled}
+              readOnly={isFieldReadOnly}
+            />
         );
 
         break;
@@ -133,6 +145,9 @@ function CommonForm({
                 })
               }
               className={isPasswordField ? "pr-10" : ""}
+              required={getControlItem.required}
+              disabled={isFieldDisabled}
+              readOnly={isFieldReadOnly}
             />
             {isPasswordField && (
               <button
@@ -161,13 +176,31 @@ function CommonForm({
       <div className="flex flex-col gap-3">
         {formControls.map((controlItem) => (
           <div className="grid w-full gap-1.5" key={controlItem.name}>
-            <Label className="mb-1">{controlItem.label}</Label>
+            <Label className="mb-1">
+              {controlItem.label}
+              {controlItem.required && <span className="text-destructive ml-1">*</span>}
+            </Label>
             {renderInputsByComponentType(controlItem)}
+            {controlItem.helperText ? (
+              <p className="text-xs text-muted-foreground">{controlItem.helperText}</p>
+            ) : null}
           </div>
         ))}
       </div>
-      <Button disabled={isBtnDisabled} type="submit" className="mt-2 w-full">
-        {buttonText || "Submit"}
+      {beforeSubmitSlot ? <div className="mt-4">{beforeSubmitSlot}</div> : null}
+      <Button
+        disabled={isBtnDisabled || isLoading}
+        type="submit"
+        className="mt-4 w-full flex items-center justify-center gap-2"
+      >
+        {isLoading ? (
+          <>
+            <Loader2 className="h-4 w-4 animate-spin" />
+            <span>{loadingText || "Processing..."}</span>
+          </>
+        ) : (
+          buttonText || "Submit"
+        )}
       </Button>
     </form>
   );

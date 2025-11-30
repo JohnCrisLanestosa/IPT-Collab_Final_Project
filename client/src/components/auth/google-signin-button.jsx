@@ -10,8 +10,8 @@ function GoogleSignInButton({ from = "register" }) {
   return (
     <Button
       type="button"
-      variant="outline"
-      className="w-full flex items-center justify-center gap-2 hover:bg-gray-50"
+      variant="ghost"
+      className="w-full flex items-center justify-center gap-2 rounded-xl border border-blue-700/60 bg-blue-900/60 text-blue-50 hover:bg-blue-800/80 hover:text-blue-50 transition-colors"
       onClick={handleGoogleSignIn}
     >
       <svg

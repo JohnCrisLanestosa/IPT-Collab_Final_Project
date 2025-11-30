@@ -55,6 +55,7 @@ function Address({ setCurrentSelectedAddress, selectedId }) {
             setFormData(initialAddressFormData);
             toast({
               title: "Address updated successfully",
+              variant: "success",
             });
           }
         })
@@ -69,6 +70,7 @@ function Address({ setCurrentSelectedAddress, selectedId }) {
             setFormData(initialAddressFormData);
             toast({
               title: "Address added successfully",
+              variant: "success",
             });
           }
         });
@@ -82,6 +84,7 @@ function Address({ setCurrentSelectedAddress, selectedId }) {
         dispatch(fetchAllAddresses(user?.id));
         toast({
           title: "Address deleted successfully",
+          variant: "success",
         });
       }
     });
